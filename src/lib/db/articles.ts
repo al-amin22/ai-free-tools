@@ -82,6 +82,35 @@ export async function createArticle(articleData: ArticleInsert): Promise<Article
   }
 }
 
+export async function getArticlesByCategory(
+  categoryId: string,
+  limit = 3
+): Promise<Article[]> {
+  const cacheKey = `${CACHE_PREFIX}:cat:${categoryId}:${limit}`
+  const cached = getCache<Article[]>(cacheKey)
+  if (cached) return cached
+
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('category_id', categoryId)
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    const articles = (data ?? []) as Article[]
+    setCache(cacheKey, articles, TTL.DB_QUERY)
+    return articles
+  } catch (err) {
+    console.error(`[db/articles] getArticlesByCategory(${categoryId}):`, err)
+    return []
+  }
+}
+
 export async function updateArticle(
   id: string,
   updates: ArticleUpdate

@@ -84,6 +84,65 @@ export function toolPageSchema(tool: Tool, category: Category): object[] {
   return schemas
 }
 
+// ─── State-specific tool page schema ─────────────────────────────────────────
+
+export function statePageSchema(
+  tool:       Tool,
+  category:   Category,
+  stateName:  string,
+  stateSlug:  string,
+  faqs?:      Array<{ q: string; a: string }>
+): object[] {
+  const toolUrl  = `${SITE_URL}/tools/${category.slug}/${tool.slug}`
+  const stateUrl = `${toolUrl}/${stateSlug}`
+
+  const webApp = {
+    '@context':          'https://schema.org',
+    '@type':             'WebApplication',
+    name:                `${tool.name} for ${stateName}`,
+    description:         `Free AI-powered ${tool.name.toLowerCase()} generator compliant with ${stateName} state law.`,
+    url:                 stateUrl,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem:     'Web',
+    areaServed: {
+      '@type':     'State',
+      name:        stateName,
+      containedIn: { '@type': 'Country', name: 'United States' },
+    },
+    offers: {
+      '@type':       'Offer',
+      price:         '0',
+      priceCurrency: 'USD',
+      availability:  'https://schema.org/InStock',
+    },
+    inLanguage:          'en-US',
+    isAccessibleForFree: true,
+    provider: {
+      '@type': 'Organization',
+      name:    SITE_NAME,
+      url:     SITE_URL,
+    },
+  }
+
+  const breadcrumbs = breadcrumbListSchema([
+    { name: 'Home',       url: SITE_URL },
+    { name: category.name, url: `${SITE_URL}/tools/${category.slug}` },
+    { name: tool.name,    url: toolUrl },
+    { name: stateName,    url: stateUrl },
+  ])
+
+  const schemas: object[] = [
+    { '@context': 'https://schema.org', ...webApp },
+    { '@context': 'https://schema.org', ...breadcrumbs },
+  ]
+
+  if (faqs?.length) {
+    schemas.push({ '@context': 'https://schema.org', ...faqPageSchema(faqs) })
+  }
+
+  return schemas
+}
+
 // ─── Article page schema ──────────────────────────────────────────────────────
 
 export function articleSchema(article: Article, faqs?: Array<{ q: string; a: string }>): object[] {

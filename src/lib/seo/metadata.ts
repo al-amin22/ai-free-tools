@@ -109,6 +109,54 @@ export function generateArticleMetadata(article: Article): Metadata {
   }
 }
 
+// ─── State-specific tool page ────────────────────────────────────────────────
+
+export function generateStateMetadata(
+  tool:      Tool,
+  category:  Category,
+  stateName: string,
+  stateCode: string,
+  metaTitleOverride?:  string | null,
+  metaDescOverride?:   string | null,
+): Metadata {
+  const title = metaTitleOverride
+    ?? `Free ${tool.name} for ${stateName} — AI Powered | ${SITE_NAME}`
+  const description = metaDescOverride
+    ?? `Generate a free ${tool.name.toLowerCase()} specific to ${stateName} in seconds. AI-powered, ${stateName} state law compliant. No sign up required.`
+  const canonical = `${SITE_URL}/tools/${category.slug}/${tool.slug}/${stateName.toLowerCase().replace(/\s+/g, '-')}`
+  const ogImage   = `${SITE_URL}/api/og?title=${encodeURIComponent(`${tool.name} — ${stateName}`)}&category=${encodeURIComponent(category.name)}&catSlug=${category.slug}`
+
+  return {
+    title,
+    description,
+    keywords: [
+      `${tool.name} ${stateName}`,
+      `${stateName} ${tool.primary_keyword ?? tool.name}`,
+      `free ${tool.name.toLowerCase()} ${stateCode}`,
+      ...tool.secondary_keywords,
+      stateName,
+      'free',
+      'AI',
+    ].filter(Boolean),
+    alternates: enUsAlternates(canonical),
+    openGraph: {
+      ...openGraphBase({ title, description, url: canonical, image: ogImage }),
+      type: 'website',
+    },
+    twitter: twitterBase(title, description, ogImage),
+    robots: {
+      index:    true,
+      follow:   true,
+      googleBot: {
+        index:               true,
+        follow:              true,
+        'max-image-preview': 'large',
+        'max-snippet':       -1,
+      },
+    },
+  }
+}
+
 // ─── Category page ────────────────────────────────────────────────────────────
 
 export function generateCategoryMetadata(category: Category): Metadata {

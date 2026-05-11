@@ -86,7 +86,7 @@ export function toolPageSchema(tool: Tool, category: Category): object[] {
 
 // ─── Article page schema ──────────────────────────────────────────────────────
 
-export function articleSchema(article: Article): object[] {
+export function articleSchema(article: Article, faqs?: Array<{ q: string; a: string }>): object[] {
   const articleUrl = `${SITE_URL}/blog/${article.slug}`
 
   const articleNode = {
@@ -122,10 +122,16 @@ export function articleSchema(article: Article): object[] {
     { name: article.title,   url: articleUrl },
   ])
 
-  return [
+  const schemas: object[] = [
     articleNode,
     { '@context': 'https://schema.org', ...breadcrumbs },
   ]
+
+  if (faqs?.length) {
+    schemas.push({ '@context': 'https://schema.org', ...faqPageSchema(faqs) })
+  }
+
+  return schemas
 }
 
 // ─── Category page schema ─────────────────────────────────────────────────────

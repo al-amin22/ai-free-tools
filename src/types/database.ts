@@ -77,6 +77,8 @@ export interface Article {
   ai_model: string | null
   created_at: string
   updated_at: string
+  // optional join
+  category?: Category
 }
 
 export type ArticleInsert = Omit<Article, 'id' | 'created_at' | 'updated_at'>

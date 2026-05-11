@@ -56,6 +56,34 @@ export async function getToolBySlug(slug: string): Promise<Tool | null> {
   }
 }
 
+export async function getToolById(id: string): Promise<Tool | null> {
+  const cacheKey = `${CACHE_PREFIX}:id:${id}`
+  const cached = getCache<Tool>(cacheKey)
+  if (cached) return cached
+
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('tools')
+      .select('*, category:categories(*)')
+      .eq('id', id)
+      .eq('is_active', true)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      throw error
+    }
+
+    const tool = data as Tool
+    setCache(cacheKey, tool, TTL.DB_QUERY)
+    return tool
+  } catch (err) {
+    console.error(`[db/tools] getToolById(${id}):`, err)
+    return null
+  }
+}
+
 export async function getToolsByCategory(categorySlug: string): Promise<Tool[]> {
   const cacheKey = `${CACHE_PREFIX}:category:${categorySlug}`
   const cached = getCache<Tool[]>(cacheKey)

@@ -3,7 +3,7 @@
 export interface FormField {
   name: string
   label: string
-  type: 'text' | 'textarea' | 'select' | 'date' | 'number'
+  type: 'text' | 'textarea' | 'select' | 'date' | 'number' | 'radio' | 'checkbox' | 'state_selector'
   placeholder?: string
   required: boolean
   options?: string[]
